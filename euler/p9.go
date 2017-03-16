@@ -5,28 +5,30 @@ package main
 
 import (
 	"fmt"
-
-	"./lib"
 )
 
-func main() {
-	const target = 1000
-	var a, b, c, py, bound int
+func ternaPitagorica() (int, int, int) {
+	const bound = 1000
+	var a, b, c int
 	var found = false
-
-	bound = int(mxlib.IntSqrt(target))
 
 	for i := 1; !found && i < bound; i++ {
 		for j := 1; !found && j < bound; j++ {
-			for k := 1; !found && k < target; k++ {
+			for k := 1; !found && k < bound; k++ {
 				i2, j2, k2 := i*i, j*j, k*k
-				py = i2 + j2 + k2
-				if py == target {
+				if (i2+j2 == k2) && (i+j+k == 1000) {
 					found = true
 					a, b, c = i, j, k
 				}
 			}
 		}
 	}
-	fmt.Printf("The terna is: %d^2 + %d^2 + %d^2 = 1000\n", a, b, c)
+	return a, b, c
+}
+
+func main() {
+	a, b, c := ternaPitagorica()
+	fmt.Printf("The terna is: %d^2 + %d^2 = %d^2\n", a, b, c)
+	fmt.Printf("Where: %d + %d + %d = %d\n", a, b, c, a+b+c)
+	fmt.Printf("The product is a*b*c = %d\n", a*b*c)
 }
