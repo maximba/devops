@@ -12,14 +12,6 @@ import (
 type Factors map[int]int
 type MapFactors map[int]Factors
 
-func intExp(base int, exponente int) int {
-    value := base;
-    for i:=2; i<=exponente; i++ {
-        value = value * base
-    }
-    return value
-}
-
 func mapFactors(numbers []int) MapFactors {
     factors := make(MapFactors)
     for _, number := range numbers {
@@ -31,7 +23,7 @@ func mapFactors(numbers []int) MapFactors {
 func reduceFactors(factors Factors) int {
     value := 1
     for base, exp := range factors {
-        value = value * intExp(base, exp)
+        value = value * mxlib.IntExp(base, exp)
     }
     return value
 }

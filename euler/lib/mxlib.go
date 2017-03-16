@@ -1,5 +1,13 @@
 package mxlib
 
+func IntExp(base int, exponente int) int {
+    value := base;
+    for i:=2; i<=exponente; i++ {
+        value = value * base
+    }
+    return value
+}
+
 func Is_prime(number int) bool {
     for n:=2; n<number; n++ {
         if number % n == 0 {
