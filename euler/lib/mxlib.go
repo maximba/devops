@@ -59,7 +59,8 @@ func IntExp(base int, exponente int) int {
 }
 
 func Is_prime(number int) bool {
-	for n := 2; n < number; n++ {
+	bound := int(IntSqrt(uint(number)))
+	for n := 2; n <= bound; n++ {
 		if number%n == 0 {
 			return false
 		}
