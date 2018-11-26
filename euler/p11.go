@@ -1,182 +1,184 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
 
-const DIM = 20
-const CHUNK = 4
+// Dimension of the Matrix
+const Dimension = 20
+
+// Factors to use
+const Factors = 4
 
 type imatrix interface {
 	left(int, int) uint64
 	right(int, int) uint64
 	up(int, int) uint64
 	down(int, int) uint64
-	up_left(int, int) uint64
-	up_right(int, int) uint64
-	down_left(int, int) uint64
-	down_right(int, int) uint64
-	prod_max(int, int) uint64
-	read_matrix()
+	upLeft(int, int) uint64
+	upRight(int, int) uint64
+	downLeft(int, int) uint64
+	downRight(int, int) uint64
+	prodMax(int, int) uint64
+	readMatrix()
 }
 
 type matrix struct {
-	grid [][]uint64
-	dim, chunk int
+	grid               [][]uint64
+	dimension, factors int
 }
 
-func max( nums ... uint64) uint64 {
-	var max_value uint64 = 0
+func max(nums ...uint64) uint64 {
+	var maxValue uint64
 	for _, num := range nums {
-		if num > max_value {
-//			fmt.Printf("%d\n", num)
-			max_value = num
+		if num > maxValue {
+			maxValue = num
 		}
-	}	
-	return max_value
+	}
+	return maxValue
 }
 
-func (m matrix) left(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundx := m.chunk -1
+func (m matrix) left(y int, x int) uint64 {
+	var prod uint64
+	boundx := m.factors - 1
 	if x >= boundx {
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[boundx-i][y]
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y][x-i]
 		}
 	}
 	return prod
 }
 
-func (m matrix ) right(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundx := m.dim - m.chunk
+func (m matrix) right(y int, x int) uint64 {
+	var prod uint64
+	boundx := m.dimension - m.factors
 	if x <= boundx {
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[boundx+i][y]
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y][x+i]
 		}
 	}
 	return prod
 }
 
-func (m matrix) up(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundy := m.chunk -1
+func (m matrix) up(y int, x int) uint64 {
+	var prod uint64
+	boundy := m.factors - 1
 	if y >= boundy {
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[x][boundy-i]
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y-i][x]
 		}
 	}
 	return prod
 }
 
-func (m matrix) down(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundy := m.dim - m.chunk
+func (m matrix) down(y int, x int) uint64 {
+	var prod uint64
+	boundy := m.dimension - m.factors
 	if y <= boundy {
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod = prod*m.grid[x][boundy+i]
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y+i][x]
 		}
 	}
 	return prod
 }
 
-func (m matrix) up_left(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundx := m.chunk - 1
-	boundy := m.chunk - 1
-	if y >= boundy && x>=boundx{
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[boundx-i][boundy-i]
+func (m matrix) upLeft(y int, x int) uint64 {
+	var prod uint64
+	boundx := m.factors - 1
+	boundy := m.factors - 1
+	if y >= boundy && x >= boundx {
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y-i][x-i]
 		}
 	}
 	return prod
 }
 
-func (m matrix) up_right(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundx := m.dim - m.chunk
-	boundy := m.chunk - 1
-	if y >= boundy && x<=boundx{
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[boundx+i][boundy-i]
+func (m matrix) upRight(y int, x int) uint64 {
+	var prod uint64
+	boundx := m.dimension - m.factors
+	boundy := m.factors - 1
+	if y >= boundy && x <= boundx {
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y-i][x+i]
 		}
 	}
 	return prod
 }
 
-func (m matrix) down_left(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundx := m.chunk -1
-	boundy := m.dim - m.chunk
-	if y <= boundy && x>=boundx{
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[boundx-i][boundy+i]
+func (m matrix) downLeft(y int, x int) uint64 {
+	var prod uint64
+	boundx := m.factors - 1
+	boundy := m.dimension - m.factors
+	if y <= boundy && x >= boundx {
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y+i][x-i]
 		}
 	}
 	return prod
 }
 
-func (m matrix) down_right(x int, y int) uint64 {
-	var prod uint64 = 0
-	boundx := m.dim - m.chunk
-	boundy := m.dim - m.chunk
-	if y <= boundy && x<=boundx{
-		prod=1
-		for i:=0; i<m.chunk; i++ {
-			prod *= m.grid[boundx+i][boundy+i]
+func (m matrix) downRight(y int, x int) uint64 {
+	var prod uint64
+	boundx := m.dimension - m.factors
+	boundy := m.dimension - m.factors
+	if y <= boundy && x <= boundx {
+		prod = 1
+		for i := 0; i < m.factors; i++ {
+			prod *= m.grid[y+i][x+i]
 		}
 	}
 	return prod
 }
 
-func (m matrix) prod_max(x int, y int) uint64 {
-	return max( m.left(x,y), 
-				m.right(x,y), 
-				m.up(x,y), 
-				m.down(x,y), 
-				m.up_left(x,y), 
-				m.up_right(x,y), 
-				m.down_left(x,y), 
-				m.down_right(x,y))
+func (m matrix) prodMax(y int, x int) uint64 {
+	return max(m.left(y, x),
+		m.right(y, x),
+		m.up(y, x),
+		m.down(y, x),
+		m.upLeft(y, x),
+		m.upRight(y, x),
+		m.downLeft(y, x),
+		m.downRight(y, x))
 }
 
-func (m matrix) read_matrix() (matrix) {
-	x := 0
-	y := 0
+func (m matrix) readMatrix() matrix {
+	i := 0
+	j := 0
 
 	fs := bufio.NewScanner(os.Stdin)
 	fs.Split(bufio.ScanWords)
 
-	m.grid[0] = make([]uint64, m.dim)
+	m.grid[0] = make([]uint64, m.dimension)
 	for fs.Scan() {
 		n, _ := strconv.Atoi(strings.TrimLeft(fs.Text(), "0"))
-		m.grid[x][y] = uint64(n)
-		y = y+1
-		if y == m.dim {
-			x = x+1
-			y = 0
-			if (x < m.dim) {
-				m.grid[x] = make([]uint64, m.dim)
+		m.grid[i][j] = uint64(n)
+		j++
+		if j == m.dimension {
+			i++
+			j = 0
+			if i < m.dimension {
+				m.grid[i] = make([]uint64, m.dimension)
 			}
 		}
 	}
 	return m
 }
 
-func print_grid(m matrix) {
-	for i:=0; i<m.dim; i++ {
-		for j:=0; j<m.dim; j++ {
+func (m matrix) printGrid() {
+	for i := 0; i < m.dimension; i++ {
+		for j := 0; j < m.dimension; j++ {
 			fmt.Printf("%02d ", m.grid[i][j])
 		}
 		fmt.Println("")
@@ -184,21 +186,21 @@ func print_grid(m matrix) {
 
 }
 
-func main () {
-	var max_value uint64 = 0
+func main() {
+	var maxValue uint64
 	m := matrix{
-		grid: make([][]uint64, DIM), 
-		dim: DIM, 
-		chunk: CHUNK,
-	}	
-	m.read_matrix()
-	print_grid(m)
-	for i:=0; i<m.dim; i++ {
-		for j:=0; j<m.dim; j++ {
-			value := m.prod_max(i, j)
-			fmt.Printf("Current value is: %d. Old Max Value is: %d\n", value, max_value)
-			max_value = max(value, max_value)			
+		grid:      make([][]uint64, Dimension),
+		dimension: Dimension,
+		factors:   Factors,
+	}
+	m.readMatrix()
+	m.printGrid()
+
+	for i := 0; i < m.dimension; i++ {
+		for j := 0; j < m.dimension; j++ {
+			value := m.prodMax(i, j)
+			maxValue = max(value, maxValue)
 		}
 	}
-	fmt.Printf("Max number is %d", max_value)
+	fmt.Printf("Max number is %d\n", maxValue)
 }
