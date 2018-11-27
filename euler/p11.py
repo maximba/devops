@@ -5,9 +5,6 @@ FACTORS = 4
 DIMENSION = 20
 matrix = [[]]
 
-def readMatrix(dimension):
-    return [[int(n) for n in line.split()] for line in sys.stdin]
-
 def left(y, x):
     boundx = FACTORS-1
     prod = 1
@@ -90,7 +87,7 @@ def prodMax(y, x):
 
 
 if __name__ == "__main__":
-    matrix = readMatrix(DIMENSION)
+    matrix = [[int(n) for n in line.split()] for line in sys.stdin]
     maxValue = 0
     for i in range(DIMENSION):
         for j in range(DIMENSION):
